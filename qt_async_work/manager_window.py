@@ -15,32 +15,29 @@ class ManagerWindow(qt.QWidget):
         def run(self):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            tasks = []
+
+            tasks = list()
             queues = dict()
 
             for window in self.manager.work_windows:
                 try:
                     input_queue = queues[window.input_queue_name]
                 except KeyError:
-                    input_queue = queues.setdefault(window.input_queue_name, asyncio.Queue())
+                    input_queue = asyncio.Queue()
+                    queues[window.input_queue_name] = input_queue
 
                 try:
                     output_queue = queues[window.output_queue_name]
                 except KeyError:
-                    output_queue = queues.setdefault(window.output_queue_name, asyncio.Queue())
+                    output_queue = asyncio.Queue()
+                    queues[window.output_queue_name] = output_queue
 
                 window.work_process = window.process_type(
                     input_queue, output_queue, window.stdout_queue
                 )
 
-                window.work_process.loop = loop
-
-                task = loop.create_task(
-                    window.work_process.run()
-                )
-                window.work_process.run_task = task
                 window.setWindowTitle(window.work_process.name)
-                tasks.append(task)
+                tasks.append(window.work_process.run_task)
 
             loop.run_until_complete(asyncio.gather(*tasks))
 

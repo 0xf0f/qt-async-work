@@ -1,6 +1,6 @@
-import traceback
 import io
 import asyncio
+import traceback
 
 from queue import Queue
 
@@ -12,7 +12,7 @@ class StopWork:
 class WorkProcess:
     instances = 0
 
-    def __init__(self, input_queue, output_queue, stdout_queue, name='None'):
+    def __init__(self, input_queue, output_queue, stdout_queue, name=None):
         super().__init__()
 
         if name is None:
@@ -27,7 +27,7 @@ class WorkProcess:
         self.stdout_queue: Queue = stdout_queue
 
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
-        self.run_task: asyncio.Task = None
+        self.run_task: asyncio.Task = self.loop.create_task(self.run())
 
         self.pause_flag = asyncio.Event()
         self.set_paused(False)
@@ -38,7 +38,7 @@ class WorkProcess:
             await self.work()
             await self.finished()
 
-        except Exception as e:
+        except Exception:
             self.print_stdout(traceback.format_exc())
 
     async def started(self):
@@ -60,6 +60,7 @@ class WorkProcess:
             self.loop.call_soon_threadsafe(
                 self.pause_flag.clear
             )
+
         else:
             self.loop.call_soon_threadsafe(
                 self.pause_flag.set
