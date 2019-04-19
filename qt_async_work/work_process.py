@@ -12,7 +12,7 @@ class StopWork:
 class WorkProcess:
     instances = 0
 
-    def __init__(self, input_queue, output_queue, stdout_queue, name='None'):
+    def __init__(self, input_queue, output_queue, stdout_queue, name=None):
         super().__init__()
 
         if name is None:
@@ -38,7 +38,7 @@ class WorkProcess:
             await self.work()
             await self.finished()
 
-        except Exception as e:
+        except Exception:
             self.print_stdout(traceback.format_exc())
 
     async def started(self):

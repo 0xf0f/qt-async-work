@@ -33,11 +33,10 @@ class ManagerWindow(qt.QWidget):
                     input_queue, output_queue, window.stdout_queue
                 )
 
-                window.work_process.loop = loop
-
                 task = loop.create_task(
                     window.work_process.run()
                 )
+
                 window.work_process.run_task = task
                 window.setWindowTitle(window.work_process.name)
                 tasks.append(task)
